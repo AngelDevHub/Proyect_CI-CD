@@ -1,0 +1,94 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: opstracker-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-opstracker}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-opstracker_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-opstracker}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-opstracker} -d ${POSTGRES_DB:-opstracker}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - opstracker-net
+
+  openobserve:
+    image: public.ecr.aws/zinclabs/openobserve:latest
+    container_name: opstracker-openobserve
+    restart: unless-stopped
+    environment:
+      ZO_ROOT_USER_EMAIL: ${OPENOBSERVE_USER:-root@example.com}
+      ZO_ROOT_USER_PASSWORD: ${OPENOBSERVE_PASSWORD:-Complexpass#123}
+      ZO_DATA_DIR: /data
+    ports:
+      - "${OPENOBSERVE_PORT:-5080}:5080"
+    volumes:
+      - openobserve_data:/data
+    networks:
+      - opstracker-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: opstracker-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      openobserve:
+        condition: service_started
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      BACKEND_PORT: 3001
+      BACKEND_HOST: 0.0.0.0
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-opstracker}:${POSTGRES_PASSWORD:-opstracker_pass}@postgres:5432/${POSTGRES_DB:-opstracker}
+      OTEL_ENABLED: ${OTEL_ENABLED:-true}
+      OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-opstracker-backend}
+      OTEL_SERVICE_VERSION: ${OTEL_SERVICE_VERSION:-1.0.0}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://openobserve:5080/api/${OPENOBSERVE_ORG:-default}
+      OTEL_METRIC_EXPORT_INTERVAL_MS: ${OTEL_METRIC_EXPORT_INTERVAL_MS:-10000}
+      OPENOBSERVE_ORG: ${OPENOBSERVE_ORG:-default}
+      OPENOBSERVE_OTEL_STREAM: ${OPENOBSERVE_OTEL_STREAM:-opstracker_logs}
+      OPENOBSERVE_USER: ${OPENOBSERVE_USER:-root@example.com}
+      OPENOBSERVE_PASSWORD: ${OPENOBSERVE_PASSWORD:-Complexpass#123}
+      OTEL_EXPORTER_OTLP_AUTH_HEADER: ${OTEL_EXPORTER_OTLP_AUTH_HEADER:-}
+    ports:
+      - "${BACKEND_PORT:-3001}:3001"
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3001/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - opstracker-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: opstracker-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    networks:
+      - opstracker-net
+
+volumes:
+  postgres_data:
+  openobserve_data:
+
+networks:
+  opstracker-net:
+    driver: bridge
