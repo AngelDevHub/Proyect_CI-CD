@@ -1,0 +1,81 @@
+{
+  "title": "OpsTracker — Unified Operations, Observability & CI/CD Dashboard",
+  "description": "Unified SRE dashboard aggregating CI/CD pipeline events, Fastify application logs/traces/metrics, and AWS EC2 infrastructure telemetries (CPU, RAM, Network Bandwidth, Temperature).",
+  "role": "",
+  "owner": "root@example.com",
+  "created": "2026-11-24T00:00:00Z",
+  "panels": [
+    {
+      "id": "panel_cicd_events",
+      "title": "CI/CD Pipeline — Recent Test & Deployment Events",
+      "type": "table",
+      "stream_name": "cicd_logs",
+      "stream_type": "logs",
+      "sql": "SELECT timestamp, event_type, status, commit_sha, branch, actor, workflow, target_host FROM cicd_logs ORDER BY timestamp DESC LIMIT 50"
+    },
+    {
+      "id": "panel_cicd_success_rate",
+      "title": "CI/CD — Success vs Failure Ratio",
+      "type": "bar",
+      "stream_name": "cicd_logs",
+      "stream_type": "logs",
+      "sql": "SELECT status, count(*) AS count FROM cicd_logs GROUP BY status"
+    },
+    {
+      "id": "panel_app_logs",
+      "title": "Application Structured Logs (Fastify + PostgreSQL)",
+      "type": "table",
+      "stream_name": "opstracker_logs",
+      "stream_type": "logs",
+      "sql": "SELECT timestamp, level, method, endpoint, statusCode, durationMs, message, trace_id FROM opstracker_logs ORDER BY timestamp DESC LIMIT 100"
+    },
+    {
+      "id": "panel_http_status_codes",
+      "title": "HTTP Status Codes Over Time (2xx, 4xx, 5xx)",
+      "type": "bar",
+      "stream_name": "opstracker_logs",
+      "stream_type": "logs",
+      "sql": "SELECT histogram(timestamp, '1 minute') AS time, statusCode, count(*) AS requests FROM opstracker_logs GROUP BY time, statusCode ORDER BY time"
+    },
+    {
+      "id": "panel_http_latency_by_endpoint",
+      "title": "Average Request Latency by Endpoint (ms)",
+      "type": "line",
+      "stream_name": "opstracker_logs",
+      "stream_type": "logs",
+      "sql": "SELECT histogram(timestamp, '1 minute') AS time, endpoint, avg(durationMs) AS avg_duration_ms FROM opstracker_logs GROUP BY time, endpoint ORDER BY time"
+    },
+    {
+      "id": "panel_ec2_cpu",
+      "title": "AWS EC2 — CPU Utilization (%)",
+      "type": "line",
+      "stream_name": "ec2_metrics",
+      "stream_type": "logs",
+      "sql": "SELECT histogram(timestamp, '1 minute') AS time, avg(cpu_usage_percent) AS cpu_percent, max(cpu_usage_percent) AS max_cpu_percent FROM ec2_metrics GROUP BY time ORDER BY time"
+    },
+    {
+      "id": "panel_ec2_memory",
+      "title": "AWS EC2 — Memory Usage (%) and Available MB",
+      "type": "line",
+      "stream_name": "ec2_metrics",
+      "stream_type": "logs",
+      "sql": "SELECT histogram(timestamp, '1 minute') AS time, avg(memory_usage_percent) AS mem_percent, avg(memory_used_mb) AS mem_used_mb, avg(memory_total_mb) AS mem_total_mb FROM ec2_metrics GROUP BY time ORDER BY time"
+    },
+    {
+      "id": "panel_ec2_bandwidth",
+      "title": "AWS EC2 — Network Bandwidth (TX vs RX kbps)",
+      "type": "line",
+      "stream_name": "ec2_metrics",
+      "stream_type": "logs",
+      "sql": "SELECT histogram(timestamp, '1 minute') AS time, avg(network_tx_kbps) AS tx_kbps, avg(network_rx_kbps) AS rx_kbps FROM ec2_metrics GROUP BY time ORDER BY time"
+    },
+    {
+      "id": "panel_ec2_temperature",
+      "title": "AWS EC2 — Temperature (°C)",
+      "type": "line",
+      "stream_name": "ec2_metrics",
+      "stream_type": "logs",
+      "sql": "SELECT histogram(timestamp, '1 minute') AS time, avg(temperature_celsius) AS temp_celsius, max(temperature_celsius) AS max_temp_celsius FROM ec2_metrics GROUP BY time ORDER BY time"
+    }
+  ]
+}

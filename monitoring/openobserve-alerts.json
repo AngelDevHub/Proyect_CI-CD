@@ -1,0 +1,54 @@
+[
+  {
+    "name": "OpsTracker — Alert: CI/CD Pipeline Test Failure",
+    "description": "Fires when GitHub Actions reports a test execution failure (Playwright or Jest) preventing EC2 deployment.",
+    "stream_name": "cicd_logs",
+    "stream_type": "logs",
+    "query": "SELECT count(*) AS failure_count FROM cicd_logs WHERE event_type = 'test_execution' AND status = 'failure'",
+    "condition": {
+      "operator": ">",
+      "threshold": 0
+    },
+    "interval_minutes": 5,
+    "severity": "critical"
+  },
+  {
+    "name": "OpsTracker — Alert: High HTTP 5xx Error Rate",
+    "description": "Fires when Fastify backend returns 3 or more 5xx HTTP responses within 5 minutes.",
+    "stream_name": "opstracker_logs",
+    "stream_type": "logs",
+    "query": "SELECT count(*) AS error_count FROM opstracker_logs WHERE statusCode >= 500",
+    "condition": {
+      "operator": ">=",
+      "threshold": 3
+    },
+    "interval_minutes": 5,
+    "severity": "high"
+  },
+  {
+    "name": "OpsTracker — Alert: EC2 High CPU Utilization",
+    "description": "Fires when AWS EC2 instance CPU utilization exceeds 85% sustained over 5 minutes.",
+    "stream_name": "ec2_metrics",
+    "stream_type": "logs",
+    "query": "SELECT avg(cpu_usage_percent) AS avg_cpu FROM ec2_metrics",
+    "condition": {
+      "operator": ">",
+      "threshold": 85.0
+    },
+    "interval_minutes": 5,
+    "severity": "warning"
+  },
+  {
+    "name": "OpsTracker — Alert: EC2 High Memory Usage",
+    "description": "Fires when AWS EC2 instance RAM usage exceeds 85% sustained over 5 minutes.",
+    "stream_name": "ec2_metrics",
+    "stream_type": "logs",
+    "query": "SELECT avg(memory_usage_percent) AS avg_mem FROM ec2_metrics",
+    "condition": {
+      "operator": ">",
+      "threshold": 85.0
+    },
+    "interval_minutes": 5,
+    "severity": "warning"
+  }
+]
