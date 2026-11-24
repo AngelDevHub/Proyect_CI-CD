@@ -100,7 +100,7 @@ jobs:
               workflow: $workflow,
               run_id: $run_id,
               run_number: $run_number,
-              repository: $repo
+              repository: $repository
             }]')
 
           curl -s -S -X POST "${{ secrets.OPENOBSERVE_URL }}/api/default/cicd_logs/_json" \
