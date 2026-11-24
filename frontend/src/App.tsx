@@ -132,7 +132,7 @@ export function App() {
       <header className="topbar">
         <div>
           <h1 className="brand-title" data-testid="app-title">
-            OpsTracker
+            OpsTracker-Error-Test
           </h1>
           <p className="brand-subtitle">
             SRE Operations Board &amp; OpenTelemetry Observability Demo
