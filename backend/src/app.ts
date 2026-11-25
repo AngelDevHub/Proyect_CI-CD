@@ -5,6 +5,8 @@ import { config } from './config';
 import { appLogger } from './logger';
 import { recordHttpMetrics } from './metrics';
 import { registerTaskRoutes } from './routes/tasks';
+import { registerAuthRoutes } from './routes/auth';
+import { registerUserRoutes } from './routes/users';
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -122,6 +124,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   });
 
   await registerTaskRoutes(app);
+  await registerAuthRoutes(app);
+  await registerUserRoutes(app);
 
   return app;
 }

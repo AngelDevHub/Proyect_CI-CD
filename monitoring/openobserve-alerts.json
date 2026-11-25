@@ -17,7 +17,7 @@
     "description": "Fires when Fastify backend returns 3 or more 5xx HTTP responses within 5 minutes.",
     "stream_name": "opstracker_logs",
     "stream_type": "logs",
-    "query": "SELECT count(*) AS error_count FROM opstracker_logs WHERE statusCode >= 500",
+    "query": "SELECT count(*) AS error_count FROM opstracker_logs WHERE statuscode >= 500",
     "condition": {
       "operator": ">=",
       "threshold": 3

@@ -11,6 +11,7 @@ export interface AppConfig {
   nodeEnv: string;
   corsOrigin: string;
   databaseUrl: string;
+  jwtSecret: string;
   otelEnabled: boolean;
   otelServiceName: string;
   otelServiceVersion: string;
@@ -41,6 +42,7 @@ export const config: AppConfig = {
   databaseUrl:
     process.env.DATABASE_URL ||
     'postgresql://opstracker:opstracker_pass@localhost:5432/opstracker',
+  jwtSecret: process.env.JWT_SECRET || 'opstracker-jwt-secret-key-2026',
   otelEnabled: (process.env.OTEL_ENABLED ?? 'true').toLowerCase() !== 'false',
   otelServiceName: process.env.OTEL_SERVICE_NAME || 'opstracker-backend',
   otelServiceVersion: process.env.OTEL_SERVICE_VERSION || '1.0.0',

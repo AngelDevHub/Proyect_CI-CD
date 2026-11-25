@@ -27,7 +27,7 @@
       "type": "table",
       "stream_name": "opstracker_logs",
       "stream_type": "logs",
-      "sql": "SELECT timestamp, level, method, endpoint, statusCode, durationMs, message, trace_id FROM opstracker_logs ORDER BY timestamp DESC LIMIT 100"
+      "sql": "SELECT timestamp, severity, method, endpoint, statuscode, duration_ms, body, trace_id FROM opstracker_logs ORDER BY _timestamp DESC LIMIT 100"
     },
     {
       "id": "panel_http_status_codes",
@@ -35,7 +35,7 @@
       "type": "bar",
       "stream_name": "opstracker_logs",
       "stream_type": "logs",
-      "sql": "SELECT histogram(timestamp, '1 minute') AS time, statusCode, count(*) AS requests FROM opstracker_logs GROUP BY time, statusCode ORDER BY time"
+      "sql": "SELECT histogram(_timestamp, '1 minute') AS time, statuscode, count(*) AS requests FROM opstracker_logs GROUP BY time, statuscode ORDER BY time"
     },
     {
       "id": "panel_http_latency_by_endpoint",
@@ -43,7 +43,7 @@
       "type": "line",
       "stream_name": "opstracker_logs",
       "stream_type": "logs",
-      "sql": "SELECT histogram(timestamp, '1 minute') AS time, endpoint, avg(durationMs) AS avg_duration_ms FROM opstracker_logs GROUP BY time, endpoint ORDER BY time"
+      "sql": "SELECT histogram(_timestamp, '1 minute') AS time, endpoint, avg(duration_ms) AS avg_duration_ms FROM opstracker_logs GROUP BY time, endpoint ORDER BY time"
     },
     {
       "id": "panel_ec2_cpu",
