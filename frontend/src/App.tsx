@@ -309,8 +309,8 @@ export function App() {
       <header className="topbar">
         <div>
           <h1 className="brand-title" data-testid="app-title">
-            OpsTracker
-          </h1>
+              OpsTracker-Broken-Build
+            </h1>
           <p className="brand-subtitle">
             SRE Operations Board, User Management &amp; OpenTelemetry Observability
           </p>
